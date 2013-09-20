@@ -1,0 +1,4 @@
+name: bitcoind_client
+version: 0.0.1
+author: Analogic s.r.o. <info@analogic.cz>
+description: Bitcoind client for Dart.
