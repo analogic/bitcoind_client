@@ -13,7 +13,7 @@ class BitcoindClient {
     this.uri = Uri.parse(url);
   }
   
-  Future call(String method, {params: const []}) {
+  Future call(String method, { params: const []}) {
     
     final payload = JSON.stringify({
       'jsonrpc': '1.0',
