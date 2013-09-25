@@ -46,7 +46,7 @@ class BitcoindClient {
           onDone: () => _http_client.close(),
           cancelOnError: true
           );
-    });
+    }).catchError(completer.completeError);
     
     return completer.future;
   }

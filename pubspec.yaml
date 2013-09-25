@@ -1,5 +1,5 @@
 name: bitcoind_client
-version: 0.0.1
+version: 0.0.3
 author: Analogic s.r.o. <info@analogic.cz>
-homepage: https://github.com/analogic/bitcoind_client
 description: Bitcoind client for Dart.
+homepage: https://github.com/analogic/bitcoind_client
