@@ -4,13 +4,18 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:json' as JSON;
 
+typedef void BitcoindClientLog(String message);
+
 class BitcoindClient {
   
   Uri uri;
+  BitcoindClientLog log;
+  bool debug = false;
   HttpClient _http_client = new HttpClient();
   
-  BitcoindClient(String url) {
+  BitcoindClient(String url, [BitcoindClientLog this.log]) {
     this.uri = Uri.parse(url);
+    debug = this.log != null;
   }
   
   Future call(String method, { params: const []}) {
@@ -21,6 +26,7 @@ class BitcoindClient {
       'params': params,
       'id': new DateTime.now().millisecondsSinceEpoch
     });
+    if(debug) { this.log('bitcoind request: ' + payload); }
 
     final completer = new Completer();
     
@@ -30,27 +36,32 @@ class BitcoindClient {
       request.headers.contentType = new ContentType("application", "json", charset: "utf-8");
       request.contentLength = payload.length;
       request.write(payload);
+      
       return request.close();
     })
     .then((HttpClientResponse response) {
       response.listen(
           (raw_data) {
-            final _data = JSON.parse(new String.fromCharCodes(raw_data));
+            var string_data = new String.fromCharCodes(raw_data);
+            if(debug) { this.log('bitcoind response: ' + string_data); }
+            
+            final _data = JSON.parse(string_data);
             if(_data['result'] != null) {
               completer.complete(_data['result']);
             } else if (_data['error'] != null) {
               completer.completeError(_data['error']);
             }
           },
-          onError: (e) => completer.completeError(e),
-          onDone: () => _http_client.close(),
+          onError: completer.completeError,
+          onDone: _http_client.close,
           cancelOnError: true
           );
-    }).catchError(completer.completeError);
+    }).catchError((e) {
+      if(debug) { this.log('bitcoind error: ' + e.toString()); }
+      completer.completeError(e);
+    });
     
     return completer.future;
-  }
-  
-  
+  } 
 }
 
