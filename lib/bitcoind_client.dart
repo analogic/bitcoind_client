@@ -2,7 +2,7 @@ library bitcoind_client;
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:json' as JSON;
+import 'dart:convert';
 
 typedef void BitcoindClientLog(String message);
 
@@ -43,7 +43,7 @@ class BitcoindClient {
       response.listen(
           (raw_data) {
             var string_data = new String.fromCharCodes(raw_data);
-            if(debug) { this.log('bitcoind response: ' + string_data); }
+            if(debug) { this.log('bitcoind response: ' + string_data.trim()); }
             
             final _data = JSON.parse(string_data);
             if(_data['result'] != null) {
