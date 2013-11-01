@@ -20,7 +20,7 @@ class BitcoindClient {
   
   Future call(String method, { params: const []}) {
     
-    final payload = JSON.stringify({
+    final payload = JSON.encode({
       'jsonrpc': '1.0',
       'method': method,
       'params': params,
@@ -45,7 +45,7 @@ class BitcoindClient {
             var string_data = new String.fromCharCodes(raw_data);
             if(debug) { this.log('bitcoind response: ' + string_data.trim()); }
             
-            final _data = JSON.parse(string_data);
+            final _data = JSON.decode(string_data);
             if(_data['result'] != null) {
               completer.complete(_data['result']);
             } else if (_data['error'] != null) {
