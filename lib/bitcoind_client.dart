@@ -18,7 +18,7 @@ class BitcoindClient {
     debug = this.log != null;
   }
   
-  Future call(String method, { params: const []}) {
+Future call(String method, { params: const []}) {
     
     final payload = JSON.encode({
       'jsonrpc': '1.0',
@@ -29,7 +29,7 @@ class BitcoindClient {
     if(debug) { this.log('bitcoind request: ' + payload); }
 
     final completer = new Completer();
-    
+
     _http_client
     .postUrl(uri)
     .then((HttpClientRequest request) {
@@ -39,28 +39,23 @@ class BitcoindClient {
       
       return request.close();
     })
-    .then((HttpClientResponse response) {
-      response.listen(
-          (raw_data) {
-            var string_data = new String.fromCharCodes(raw_data);
-            if(debug) { this.log('bitcoind response: ' + string_data.trim()); }
-            
-            final _data = JSON.decode(string_data);
-            if(_data['result'] != null) {
-              completer.complete(_data['result']);
-            } else if (_data['error'] != null) {
-              completer.completeError(_data['error']);
-            }
-          },
-          onError: completer.completeError,
-          onDone: _http_client.close,
-          cancelOnError: true
-          );
+    .then((HttpClientResponse response)
+      => response.fold('', (String prev, List el) => prev += new String.fromCharCodes(el)))
+    .then((String string_data) {
+      if(debug) { this.log('bitcoind response: $string_data'); }
+
+      final _data = JSON.decode(string_data);
+
+      if(_data['result'] != null) {
+        completer.complete(_data['result']);
+      } else if (_data['error'] != null) {
+        completer.completeError(_data['error']);
+      }
     }).catchError((e) {
       if(debug) { this.log('bitcoind error: ' + e.toString()); }
       completer.completeError(e);
     });
-    
+
     return completer.future;
   } 
 }
